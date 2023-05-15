@@ -1,0 +1,42 @@
+### @name signup
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+  "email": "user1@gmail.com",
+  "password": "12345678"
+}
+
+### @name login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "testauth@gmail.com",
+  "password": "12345678"
+}
+
+### @name getCurrentUser
+GET http://localhost:3000/auth/whoami
+
+### @name logout
+POST http://localhost:3000/auth/logout
+
+### FIND A PARTICULAR USER WITH GIVEN ID
+GET http://localhost:3000/auth/2
+
+### Find all users with a given EMAIL
+GET http://localhost:3000/auth?email=minhquanle312@gmail.com
+
+### Delete a user with a given ID
+DELETE http://localhost:3000/auth/311
+
+### Update a user
+PATCH http://localhost:3000/auth/2
+Content-Type: application/json
+
+{
+  "email": "changeMail@example.com"
+}
+
+
