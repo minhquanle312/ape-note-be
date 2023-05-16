@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Note } from './note.entity';
 import { Member } from 'src/users/member.entity';
 import { CreateNoteDto } from './dtos/create-note.dto';
@@ -36,12 +36,24 @@ export class NotesService {
 
   getQueryNote(query: NoteQueryDto, req: any) {
     const { queryString } = query;
-    return this.noteRepo
-      .createQueryBuilder()
-      .where('userId = :userId', { userId: req.user.id })
-      .andWhere('title like :title', { title: `%${queryString}%` })
-      .orWhere('content like :content', { content: `%${queryString}%` })
-      .getMany();
+    // return this.noteRepo
+    //   .createQueryBuilder()
+    //   .where('userId = :userId', { userId: req.user.id })
+    //   .andWhere('title like :title', { title: `%${queryString}%` })
+    //   .orWhere('content like :content', { content: `%${queryString}%` })
+    //   .getMany();
+    return this.noteRepo.find({
+      where: [
+        {
+          userId: req.user.id,
+          title: ILike(`%${queryString}%`),
+        },
+        {
+          userId: req.user.id,
+          content: ILike(`%${queryString}%`),
+        },
+      ],
+    });
   }
 
   findOneNote(id: number) {
