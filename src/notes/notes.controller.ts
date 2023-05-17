@@ -20,16 +20,29 @@ import { UpdateNoteDto } from './dtos/update-note.dto';
 import { NoteQueryDto } from './dtos/note-query.dto';
 import { Serialize } from 'src/interceptors/serialize.interceptor';
 import { NoteDto } from './dtos/note.dto';
+import { MembersService } from './members.service';
+import { CreateMemberDto } from './dtos/create-member.dto';
+import { MemberDto } from './dtos/member.dto';
+import { UserDto } from 'src/users/dtos/user.dto';
 
 @Controller('notes')
 // @Serialize(NoteDto)
 export class NotesController {
-  constructor(private notesService: NotesService) {}
+  constructor(
+    private notesService: NotesService,
+    private membersService: MembersService,
+  ) {}
 
   @Get('/currentUserNote')
   @UseGuards(AuthGuard)
   getAllNoteOfCurrUser(@Request() req: any) {
     return this.notesService.findNotesOfUser(req.user.id);
+  }
+
+  @Get('/sharedWithMe')
+  @UseGuards(AuthGuard)
+  getAllSharedNotes(@CurrentUser() user: User) {
+    return this.notesService.getAllSharedNote(user);
   }
 
   // @Get()
@@ -50,15 +63,24 @@ export class NotesController {
     return this.notesService.create(body, user);
   }
 
-  @Get(':id')
-  @UseGuards(AuthGuard)
-  async getOneNote(@Param('id', ParseIntPipe) id: number) {
-    const note = await this.notesService.findOneNote(id);
-    console.log(id, note);
-    return note;
+  @Delete('members/:id')
+  deleteMember(@Param('id', ParseIntPipe) id: number) {
+    return this.membersService.deleteMember(id);
   }
 
-  @Patch('/:id')
+  // @Get(':noteId/members')
+  // @UseGuards(AuthGuard)
+  // getAllMember(@Param('noteId', ParseIntPipe) nodeId: number) {
+  //   return this.membersService.getAllMemberOfNote(nodeId);
+  // }
+
+  @Get(':id')
+  @UseGuards(AuthGuard)
+  getOneNote(@Param('id', ParseIntPipe) id: number) {
+    return this.notesService.findOneNote(id);
+  }
+
+  @Patch(':id')
   @UseGuards(AuthGuard)
   async updateNote(
     @Param('id', ParseIntPipe) id: number,
@@ -67,9 +89,20 @@ export class NotesController {
     await this.notesService.updateNote(id, body);
   }
 
-  @Delete('/:id')
+  @Delete(':id')
   @UseGuards(AuthGuard)
   async deleteUser(@Param('id', ParseIntPipe) id: number) {
     await this.notesService.deleteNote(id);
+  }
+
+  // * Handle Member api
+  @Post(':noteId/members')
+  @UseGuards(AuthGuard)
+  addMemberToNote(
+    @Param('noteId', ParseIntPipe) noteId: number,
+    @Body() body: CreateMemberDto,
+    @CurrentUser() user: User,
+  ) {
+    return this.membersService.addMemberToNote(noteId, body, user);
   }
 }

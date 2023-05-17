@@ -61,7 +61,11 @@ export class NotesService {
 
     return this.noteRepo.findOne({
       where: { id },
-      relations: ['members'],
+      relations: {
+        members: {
+          user: true,
+        },
+      },
     });
   }
 
@@ -69,7 +73,20 @@ export class NotesService {
     return this.noteRepo.update({ id }, body);
   }
 
-  deleteNote(id: number) {
+  async deleteNote(id: number) {
+    await this.memberRepo.delete({ note: { id } });
+
     return this.noteRepo.delete({ id });
+  }
+
+  async getAllSharedNote(user: User) {
+    const membersIn = await this.memberRepo.find({
+      where: { user: { id: user.id } },
+      relations: {
+        note: true,
+      },
+    });
+    const notesList = membersIn.map((item: any) => item.note);
+    return notesList;
   }
 }
